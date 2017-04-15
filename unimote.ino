@@ -364,7 +364,7 @@ void AppleTvMode()
 
 void SpeakerRequest(String command)
 {
-    IPAddress ip(192, 168, 1, 110);
+    IPAddress ip(192, 168, 1, 103);
     request.ip = ip;
     request.port = 80;
 
