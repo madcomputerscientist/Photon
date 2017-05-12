@@ -1,4 +1,8 @@
 // This #include statement was automatically added by the Particle IDE.
+#include <PubNub.h>
+#include "application.h"
+
+// This #include statement was automatically added by the Particle IDE.
 #include <HttpClient.h>
 
 // This #include statement was automatically added by the Particle IDE.
@@ -24,6 +28,14 @@ http_response_t response;
 int lastSecond = 0;
 int backlight = LOW;
 int currentMode = 0;
+
+char pubKeySmartLamp[] = "pub-c-0bed295e-a3e2-451a-882c-76cda83f73c9";
+char subKeySmartLamp[] = "sub-c-3477209c-225a-11e7-894d-0619f8945a4f";
+char channelSmartLamp[] = "Smart Lamp";
+
+char pubKeyAlexaPi[] = "pub-c-c986ff40-0e29-415b-a1a6-1dcf79095d51";
+char subKeyAlexaPi[] = "sub-c-2d8fef94-dad3-11e6-8da7-0619f8945a4f";
+char channelAlexaPi[] = "Alexa Pi";
 
 void setup(void)
 {
@@ -104,6 +116,27 @@ void loop(void)
     }
 }
 
+void setMode(int mode)
+{
+    currentMode = mode;
+    
+    if (mode == 0)
+    {
+        PubNub.begin(pubKeyAlexaPi, subKeyAlexaPi);
+        setText("Clock", "");
+        showClock();
+    }
+    else if (mode == 1)
+    {
+        PubNub.begin(pubKeySmartLamp, subKeySmartLamp);
+        setText("Smart Lamp", "");
+    }
+    else if (mode == 2)
+    {
+        setText("Apple TV", "");
+    }
+}
+
 void modeAction(int mode, int button)
 {
     // Clock mode
@@ -128,6 +161,16 @@ void modeAction(int mode, int button)
         }
         */
     }
+    // Light mode
+    else if (mode == 1)
+    {
+        LightMode(button);
+    }
+    else if (mode == 2)
+    {
+        AppleTvMode(button);
+    }
+    /*
     // TV Remote mode
     else if (mode == 1)
     {
@@ -138,6 +181,7 @@ void modeAction(int mode, int button)
     {
         CableRemoteMode(button);
     }
+    */
 }
 
 void showClock()
@@ -166,8 +210,56 @@ void showClock()
     }
 }
 
-void CableRemoteMode(int button)
+void AppleTvMode(int button)
 {
+    if (button == D3)
+    {
+        setText("Apple TV", "Up");
+        IrBlasterRequest("appletv", "KEY_UP");
+        delay(10);
+    }
+
+    if (button == D4)
+    {
+        setText("Apple TV", "Down");
+        IrBlasterRequest("appletv", "KEY_DOWN");
+        delay(10);
+    }
+
+    if (button == D5)
+    {
+        setText("Apple TV", "Right");
+        IrBlasterRequest("appletv", "KEY_RIGHT");
+        delay(10);
+    }
+
+    if (button == D2)
+    {
+        setText("Apple TV", "Left");
+        IrBlasterRequest("appletv", "KEY_LEFT");
+        delay(10);
+    }
+
+    if (button == D6)
+    {
+        setText("Apple TV", "Select");
+        IrBlasterRequest("appletv", "KEY_OK");
+        delay(10);
+    }
+
+    if (button == D7)
+    {
+        setText("Apple TV", "Menu");
+        IrBlasterRequest("appletv", "KEY_MENU");
+        delay(10);
+    }
+    
+    if (button == A0)
+    {
+        setText("TV", "Input");
+        IrBlasterRequest("hometv", "KEY_CYCLEWINDOWS");
+        delay(10);
+    }
 }
 
 void TvRemoteMode(int button)
@@ -231,28 +323,47 @@ void TvRemoteMode(int button)
     }
 }
 
-void setMode(int mode)
+void LightMode(int button)
 {
-    currentMode = mode;
+    String command;
     
-    if (mode == 0)
+    if (button == D3)
     {
-        setText("Clock", "");
-        showClock();
+        command = "On";
     }
-    else if (mode == 1)
+
+    if (button == D4)
     {
-        setText("TV Remote", "VU-VD-CU-CD-Mode");
+        command = "Off";
     }
-    else if (mode == 2)
+
+    if (button == D5)
     {
-        setText("Cable Remote", "TV-CB-CC-In-Mode");
+        command = "White";
     }
+
+    if (button == D2)
+    {
+        command = "Yellow";
+    }
+
+    if (button == D6)
+    {
+        command = "Blink";
+    }    
+
+    setText("Smart Lamp", command);
+
+    TCPClient *client;
+    String msg = "{\"command\":\"" + command + "\"}";
+    client = PubNub.publish(channelSmartLamp, msg);
+    client->stop();
+    delay(200);
 }
 
 void IrBlasterRequest(String remote, String command)
 {
-    IPAddress ip(192, 168, 1, 103);
+    IPAddress ip(192, 168, 86, 27);
     request.ip = ip;
     request.port = 80;
 
