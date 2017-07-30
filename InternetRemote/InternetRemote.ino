@@ -14,8 +14,6 @@
 // This #include statement was automatically added by the Particle IDE.
 #include <InternetButton.h>
 
-#include "SparkIntervalTimer.h"
-#include "SimpleRingBuffer.h"
 #include <math.h>
 
 #define MICROPHONE_PIN A0
@@ -214,6 +212,11 @@ void loop()
     {
         Particle.publish("Button Pressed", "A", 60, PRIVATE);
 
+        if (!notificationAvailable)
+        {
+            invokeQuery();
+        }
+
         notificationAvailable = false;
     }
 
@@ -270,8 +273,9 @@ void invokeQuery()
     client->stop();
     delay(200);
 */
+    b.rainbow(5);
     Particle.publish("Listen", "initiate", 60, PRIVATE);
-    delay(500);
+    //delay(500);
 }
 
 void toggleListening()
@@ -587,7 +591,8 @@ void sendAudio(void)
     }
 }
 
-void write_socket(TCPClient socket, uint8_t *buffer, int count)
+/*
+void write_socket(TCPClient socket, uint16_t *buffer, int count)
 {
     socket.write(buffer, count);
 }
@@ -598,3 +603,4 @@ void toggleLED()
     ledState = !ledState;
     digitalWrite(D7, (ledState) ? HIGH : LOW);
 }
+*/

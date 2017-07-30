@@ -1,3 +1,11 @@
 {
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "files.associations": {
+        "ios": "cpp",
+        "channel_stack_builder.c": "cpp",
+        "tcp_server_posix.c": "cpp",
+        "completion_queue.c": "cpp",
+        "init.c": "cpp",
+        "t1_lib.c": "cpp"
+    }
 }

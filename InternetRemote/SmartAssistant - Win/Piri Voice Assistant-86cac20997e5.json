@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "rugged-reality-639",
+  "private_key_id": "86cac20997e5919c473e45677f4ae2a56ae5afe2",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDJPyDxOYrXyWhB\nh5sluHTsiEdJdawToja1dPS0OJh0yhqmJaOiEdokA1/a1sxFU5VSBFTE3B2oizhL\ntLJgfPDeenyieNw2aIKxe+wxM7GmqhDpl5MnYeTVhpw1m15UjSZwCtJR7pJCMzN3\nk7PI9kmxhqBOfJ3qfAJEVFVxvYbmnim8XQZnzKI8voS6kSEtDN7dmj3qY1wgzyXj\nta9t+yBOt0iYYtJNuRB1PTpn4lkLnT02IMYpyn3YoppHYuooeKP0EUcl896pJ27Q\nLy6VKyBAgp1nWUcCXyELSGZTorZlZH4oo78N0Ked3ZnpwfTnXh7kkqUeTMMFK/tX\nthvstNE1AgMBAAECggEAJsm3mDbeh2PG5+ZypU0NoC9OCh8XiPs5bzT5GylTXSM9\nCqvzg3/MWyeZWI0Q9wW6oIG8Mus3/i3DLnhH7yf1pvPVxNzlmMkA86NubTdI9NYP\nh25TCwKnv+3/eqeVAVfpQiwbyHXik8bZkyERRFkP8BsCF86WA0VejHvysgb1Esqu\nsEJlPVhqWcgq6dYx443CZL7hswaDpzwt9E7VibHWBMwXAFxlk7mjE4n6FXmkvzcs\n3OhSjkJYgJatqQXZ5AT+aZGhGIXf1no0YJZ7S85+dIySTCtVQSlxN2/ZteLVSvNI\ndvD7kv00yu0TZ6Wn8Fc/rCzdsWa/zei8Sbq8BBSCsQKBgQDsWl7LHU5w5HUoGE7Z\nLVCGxAg4ZPHgy59v/6YmUYSligAqt4RqwTh5TWVqTPrORuS0gn0OJE/NQTHPrv+a\n85UsD4mCRhqhKHA7KJ0bQwUVBvLAwewNpo005H4IC1+Z/DToFoyNB/HzI1XUQLMp\nQztl+s16wPVugdCOXJHkjp9rPQKBgQDZ+bA28FptkuM7yADtKH0+mqoPIS3bpUi8\ndSJ6YGuAMnz5sWqHxUPn0vRYl8Dg74Fv51ODhMRQU1xbf662uMwcuzxkvFyu8GUa\nm+jw+RSO9UhX7zH0ksJhW1nf3QT/8L+5sfTFnc3tswGmX8L+9OznUMZ+4cFh0Kdk\nTCMjHVc9WQKBgAP7Qb2KMNgWASM7xZhC+yhKBRluGeT/iSAJ3nKmzOU8/eO6U7C4\nsIrakurHgTIYX6Hq0NB8LBv5DS3CdOvXTpv/ZwGazLgKRlm4xWzAJEXGaDB3E9Ln\nC1nov3bDOkkNxpZiStvVVm4SGlAJBvua9lUxdGSs+3VxGmJLjOmcvXLBAoGAcytF\nGtIFxW1d2KFFNAk3m5NWlSXft/TtqH1vWR+GzTZf6AIAmnn09hD0/7Y2t+J0Dm84\nJf5JR3O0Ebg11N9xISEguMz5X4kusk98VY4Vea9JqQR97Y55W71LkEeUM7K9al0H\nSj6lppj1HzXrrpA0d8erCTE43vjC6PB9hDkldgkCgYAbj0NnPRVJJ0amVCEOK4xI\nmjm/KBSM4rxvajLY7pDGBSLv4XYW9I417HqT9AwdlRN9uA3RH3na6PZ+2Rdy1hlh\n71r6tBPUvF5bhPpfrzWTP1ZkrxJd6ZGDxeQ4fPj14wqDtO9rcrEjXqeuK3f+b3Pc\nSsXbeUaKfWWUEEe7BQLU+w==\n-----END PRIVATE KEY-----\n",
+  "client_email": "rugged-reality-639@appspot.gserviceaccount.com",
+  "client_id": "111244024074867967266",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/rugged-reality-639%40appspot.gserviceaccount.com"
+}
