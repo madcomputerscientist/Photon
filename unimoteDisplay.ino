@@ -50,7 +50,7 @@ void setup(void)
     pinMode(A0, INPUT_PULLDOWN);
     pinMode(A1, INPUT_PULLDOWN);
 
-    digitalWrite(D2, backlight);
+    //digitalWrite(D2, backlight);
     
     Serial.begin(9600);
     lcd = new LiquidCrystal_I2C(0x3F, 16, 2);
@@ -103,7 +103,7 @@ void loop(void)
 
     if (ButtonPressed(A1))
     {
-        if (currentMode == 2)
+        if (currentMode == 4)
         {
             currentMode = 0;
         }
@@ -128,10 +128,18 @@ void setMode(int mode)
     }
     else if (mode == 1)
     {
+        setText("Cable", "");
+    }
+    else if (mode == 2)
+    {
+        setText("Cable Playback", "");
+    }
+    else if (mode == 3)
+    {
         PubNub.begin(pubKeySmartLamp, subKeySmartLamp);
         setText("Smart Lamp", "");
     }
-    else if (mode == 2)
+    else if (mode == 4)
     {
         setText("Apple TV", "");
     }
@@ -161,27 +169,25 @@ void modeAction(int mode, int button)
         }
         */
     }
-    // Light mode
-    else if (mode == 1)
-    {
-        LightMode(button);
-    }
-    else if (mode == 2)
-    {
-        AppleTvMode(button);
-    }
-    /*
-    // TV Remote mode
-    else if (mode == 1)
-    {
-        TvRemoteMode(button);
-    }
     // Cable Remote mode
-    else if (mode == 2)
+    else if (mode == 1)
     {
         CableRemoteMode(button);
     }
-    */
+    // Cable Playback mode
+    else if (mode == 2)
+    {
+        CablePlaybackMode(button);
+    }
+    // Light mode
+    else if (mode == 3)
+    {
+        LightMode(button);
+    }
+    else if (mode == 4)
+    {
+        AppleTvMode(button);
+    }
 }
 
 void showClock()
@@ -258,6 +264,122 @@ void AppleTvMode(int button)
     {
         setText("TV", "Input");
         IrBlasterRequest("hometv", "KEY_CYCLEWINDOWS");
+        delay(10);
+    }
+}
+
+void CableRemoteMode(int button)
+{
+    if (button == D3)
+    {
+        setText("Cable", "Up");
+        IrBlasterRequest("twc", "KEY_UP");
+        delay(10);
+    }
+
+    if (button == D4)
+    {
+        setText("Cable", "Down");
+        IrBlasterRequest("twc", "KEY_DOWN");
+        delay(10);
+    }
+
+    if (button == D5)
+    {
+        setText("Cable", "Right");
+        IrBlasterRequest("twc", "KEY_RIGHT");
+        delay(10);
+    }
+
+    if (button == D2)
+    {
+        setText("Cable", "Left");
+        IrBlasterRequest("twc", "KEY_LEFT");
+        delay(10);
+    }
+
+    if (button == D6)
+    {
+        setText("Cable", "Select");
+        IrBlasterRequest("twc", "KEY_SELECT");
+        delay(10);
+    }
+
+    if (button == D7)
+    {
+        setText("Cable", "Exit");
+        IrBlasterRequest("twc", "KEY_EXIT");
+        delay(10);
+    }
+    
+    if (button == A0)
+    {
+        setText("Cable", "Menu");
+        IrBlasterRequest("twc", "KEY_MENU");
+        delay(10);
+    }
+}
+
+void CablePlaybackMode(int button)
+{
+    if (button == D3)
+    {
+        setText("Cable Playback", "Forward");
+        IrBlasterRequest("twc", "KEY_FASTFORWARD");
+        delay(10);
+    }
+
+    if (button == D4)
+    {
+        setText("Cable Playback", "Rewind");
+        IrBlasterRequest("twc", "KEY_REWIND");
+        delay(10);
+    }
+
+    if (button == D5)
+    {
+        setText("Cable Playback", "Fast Forward");
+        IrBlasterRequest("twc", "KEY_FASTFORWARD");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_FASTFORWARD");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_FASTFORWARD");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_FASTFORWARD");
+        delay(10);
+    }
+
+    if (button == D2)
+    {
+        setText("Cable Playback", "Fast Rewind");
+        IrBlasterRequest("twc", "KEY_REWIND");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_REWIND");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_REWIND");
+        delay(10);
+        IrBlasterRequest("twc", "KEY_REWIND");
+        delay(10);
+    }
+
+    if (button == D6)
+    {
+        setText("Cable Playback", "Play");
+        IrBlasterRequest("twc", "KEY_PLAY");
+        delay(10);
+    }
+
+    if (button == D7)
+    {
+        setText("Cable Playback", "Stop");
+        IrBlasterRequest("twc", "KEY_STOP");
+        delay(10);
+    }
+    
+    if (button == A0)
+    {
+        setText("Cable Playback", "Record");
+        IrBlasterRequest("twc", "KEY_RECORD");
         delay(10);
     }
 }
@@ -377,6 +499,13 @@ bool ButtonPressed(int button)
 {
     bool buttonPressed = false;
     
+    /*
+    if (digitalRead(button) == HIGH)
+    {
+        buttonPressed = true;
+    }
+    */
+
     if (digitalRead(button) == HIGH)
     {
         delay(50);
@@ -386,7 +515,7 @@ bool ButtonPressed(int button)
             buttonPressed = true;
         }
     }
-    
+
     return buttonPressed;
 }
 
