@@ -31,7 +31,7 @@ int currentMode = 0;
 
 char pubKeySmartLamp[] = "pub-c-0bed295e-a3e2-451a-882c-76cda83f73c9";
 char subKeySmartLamp[] = "sub-c-3477209c-225a-11e7-894d-0619f8945a4f";
-char channelSmartLamp[] = "Smart Lamp";
+char channelSmartLamp[] = "SmartLamp";
 
 char pubKeyAlexaPi[] = "pub-c-c986ff40-0e29-415b-a1a6-1dcf79095d51";
 char subKeyAlexaPi[] = "sub-c-2d8fef94-dad3-11e6-8da7-0619f8945a4f";
