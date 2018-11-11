@@ -29,9 +29,18 @@ int lastSecond = 0;
 int backlight = LOW;
 int currentMode = 0;
 
+int r2d2Socket1Status = 1;
+int r2d2Socket2Status = 1;
+int r2d2Light1Status = 0;
+int r2d2Light2Status = 0;
+
 char pubKeySmartLamp[] = "pub-c-0bed295e-a3e2-451a-882c-76cda83f73c9";
 char subKeySmartLamp[] = "sub-c-3477209c-225a-11e7-894d-0619f8945a4f";
 char channelSmartLamp[] = "SmartLamp";
+
+char pubKeyR2D2[] = "pub-c-d799f0cf-1f2a-48f4-8164-98bee0956a1e";
+char subKeyR2D2[] = "sub-c-a0a6cbb0-e0a9-11e7-ad36-deb77ae39928";
+char channelR2D2[] = "R2-D2";
 
 char pubKeyAlexaPi[] = "pub-c-c986ff40-0e29-415b-a1a6-1dcf79095d51";
 char subKeyAlexaPi[] = "sub-c-2d8fef94-dad3-11e6-8da7-0619f8945a4f";
@@ -50,7 +59,7 @@ void setup(void)
     pinMode(A0, INPUT_PULLDOWN);
     pinMode(A1, INPUT_PULLDOWN);
 
-    //digitalWrite(D2, backlight);
+    digitalWrite(D2, backlight);
     
     Serial.begin(9600);
     lcd = new LiquidCrystal_I2C(0x3F, 16, 2);
@@ -103,7 +112,7 @@ void loop(void)
 
     if (ButtonPressed(A1))
     {
-        if (currentMode == 4)
+        if (currentMode == 5)
         {
             currentMode = 0;
         }
@@ -143,11 +152,16 @@ void setMode(int mode)
     {
         setText("Apple TV", "");
     }
+    else if (mode == 5)
+    {
+        PubNub.begin(pubKeyR2D2, subKeyR2D2);
+        setText("R2-D2", "");
+    }
 }
 
 void modeAction(int mode, int button)
 {
-    // Clock mode
+    // Clock/TV mode
     if (mode == 0)
     {
         TvRemoteMode(button);
@@ -184,10 +198,21 @@ void modeAction(int mode, int button)
     {
         LightMode(button);
     }
+    // Apple TV mode
     else if (mode == 4)
     {
         AppleTvMode(button);
     }
+    // R2 mode
+    else if (mode == 5)
+    {
+        R2D2Mode(button);
+    }
+}
+
+String GetTemperature(String deviceName)
+{
+    
 }
 
 void showClock()
@@ -483,6 +508,104 @@ void LightMode(int button)
     delay(200);
 }
 
+void R2D2Mode(int button)
+{
+    String command, msg;
+    
+    if (button == D3)
+    {
+        if (r2d2Light1Status == 0)
+        {
+            command = "Headlight 1 On";
+            msg = "{\"command\":\"TurnOnHeadLightIntent\",\"slot\":\"1\"}";
+            r2d2Light1Status = 1;
+        }
+        else
+        {
+            command = "Headlight 1 Off";
+            msg = "{\"command\":\"TurnOffHeadLightIntent\",\"slot\":\"1\"}";
+            r2d2Light1Status = 0;
+        }
+    }
+
+    if (button == D4)
+    {
+        if (r2d2Light2Status == 0)
+        {
+            command = "Headlight 2 On";
+            msg = "{\"command\":\"TurnOnHeadLightIntent\",\"slot\":\"2\"}";
+            r2d2Light2Status = 1;
+        }
+        else
+        {
+            command = "Headlight 2 Off";
+            msg = "{\"command\":\"TurnOffHeadLightIntent\",\"slot\":\"2\"}";
+            r2d2Light2Status = 0;
+        }
+    }
+
+    if (button == D5)
+    {
+        command = "Face Right";
+        msg = "{\"command\":\"FaceRightIntent\",\"ticks\":\"100\"}";
+    }
+
+    if (button == D2)
+    {
+        command = "Face Left";
+        msg = "{\"command\":\"FaceLeftIntent\",\"ticks\":\"100\"}";
+    }
+
+    if (button == A0)
+    {
+        command = "";
+        msg = "{\"command\":\"\"}";
+        //command = "Face Center";
+        //msg = "{\"command\":\"FaceCenterIntent\"}";
+    }
+
+    if (button == D6)
+    {
+        if (r2d2Socket1Status == 0)
+        {
+            command = "Turn On Slot 1";
+            msg = "{\"command\":\"TurnOnSocketIntent\",\"slot\":\"2\"}";
+            r2d2Socket1Status = 1;
+        }
+        else
+        {
+            command = "Turn Off Slot 1";
+            msg = "{\"command\":\"TurnOffSocketIntent\",\"slot\":\"2\"}";
+            r2d2Socket1Status = 0;
+        }
+    }    
+
+    if (button == D7)
+    {
+        if (r2d2Socket2Status == 0)
+        {
+            command = "Turn On Slot 2";
+            msg = "{\"command\":\"TurnOnSocketIntent\",\"slot\":\"1\"}";
+            r2d2Socket2Status = 1;
+        }
+        else
+        {
+            command = "Turn Off Slot 2";
+            msg = "{\"command\":\"TurnOffSocketIntent\",\"slot\":\"1\"}";
+            r2d2Socket2Status = 0;
+        }
+    }    
+
+    setText("R2-D2", command);
+    
+    Particle.publish("R2-D2 Request", msg);
+
+    TCPClient *client;
+    client = PubNub.publish(channelR2D2, msg);
+    client->stop();
+    delay(200);
+}
+
 void IrBlasterRequest(String remote, String command)
 {
     IPAddress ip(192, 168, 86, 27);
@@ -490,8 +613,8 @@ void IrBlasterRequest(String remote, String command)
     request.port = 80;
 
     request.path = "/irremote.php?remote=" + remote + "&key=" + command;
-    http.get(request, response, headers);
     Particle.publish("TV Remote Request", request.path);
+    http.get(request, response, headers);
     Particle.publish("TV Remote Response", String(response.status));
 }
 
