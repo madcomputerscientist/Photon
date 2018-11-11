@@ -1,20 +1,13 @@
-// This #include statement was automatically added by the Particle IDE.
 #include "SparkIntervalTimer.h"
-
-// This #include statement was automatically added by the Particle IDE.
 #include "SimpleRingBuffer.h"
-
-// This #include statement was automatically added by the Particle IDE.
 #include "GOFi2cOLED.h"
-//#include "Wire.h"
-
-// This #include statement was automatically added by the Particle IDE.
 #include <PubNub.h>
-
-// This #include statement was automatically added by the Particle IDE.
 #include <InternetButton.h>
-
 #include <math.h>
+#include "PowerShield.h"
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BMP085.h>
 
 #define MICROPHONE_PIN A0
 #define AUDIO_BUFFER_MAX 8192
@@ -49,7 +42,6 @@ volatile int counter = 0;
 unsigned int lastLog = 0;
 unsigned int lastClientCheck = 0;
 
-
 InternetButton b = InternetButton();
 GOFi2cOLED oled;
 
@@ -69,25 +61,42 @@ char channelInternetRemote[] = "Internet Remote";
 char channelNotification[] = "Notification";
 char channelListen[] = "Listen";
 
+PowerShield batteryMonitor;
+Adafruit_BMP085 bmpSensor = Adafruit_BMP085();
+
 void setup()
 {
-    Time.zone(-4);
+    Time.zone(-5);
 
     oled.init(0x3C);  //initialze  OLED display, default slave address is 0x3D
-    oled.display(); // show splashscreen
-    delay(2000);
-    oled.clearDisplay();
+    //oled.display(); // show splashscreen
+    //delay(2000);
+    //oled.clearDisplay();
 
     b.begin();
 
     pinMode(button1, INPUT_PULLDOWN);
 
-    setMode(currentModeIndex);
-
     //setupPubNub();
     setupNotification();
     
     setupMicrophone();
+
+    setupBatteryMonitor();
+
+    setupBmpSensor();
+}
+
+void setupBmpSensor()
+{
+    bmpSensor.begin();
+}
+
+void setupBatteryMonitor()
+{
+    batteryMonitor.begin();
+    // This sets up the fuel gauge
+    batteryMonitor.quickStart();
 }
 
 void setupMicrophone()
@@ -104,16 +113,15 @@ void setupMicrophone()
 
     //int mySampleRate = AUDIO_TIMING_VAL;
 
+    IPAddress myIp = WiFi.localIP();
+    sprintf(myIpAddress, "%d.%d.%d.%d", myIp[0], myIp[1], myIp[2], myIp[3]);
     Particle.variable("ipAddress", myIpAddress, STRING);
     //Particle.variable("\", &mySampleRate, INT);
     //Particle.publish("sample_rate", " my sample rate is: " + String(AUDIO_TIMING_VAL));
 
-    IPAddress myIp = WiFi.localIP();
-    sprintf(myIpAddress, "%d.%d.%d.%d", myIp[0], myIp[1], myIp[2], myIp[3]);
-
     audio_buffer.init(AUDIO_BUFFER_MAX);
 
-    // // send a chunk of audio every 1/2 second
+    // send a chunk of audio every 1/2 second
     // sendAudioTimer.begin(sendAudio, 1000, hmSec);
 
     audioServer.begin();
@@ -187,15 +195,14 @@ void loop()
     {
         Particle.publish("Button Pressed", "Left", 60, PRIVATE);
         
-        currentModeIndex += 1;
-        if (currentModeIndex > 2) currentModeIndex = 0;
-        setMode(currentModeIndex);
+        currentModeIndex = 1;
     }
 
     if (b.buttonOn(1))
     {
         Particle.publish("Button Pressed", "Up", 60, PRIVATE);
 
+        currentModeIndex = 0;
         toggleFlashlight();
     }
 
@@ -203,8 +210,14 @@ void loop()
     {
         Particle.publish("Button Pressed", "Right", 60, PRIVATE);
         
-        b.rainbow(5);
-        b.playSong("E5,8,G5,8,E6,8,C6,8,D6,8,G6,8");
+        currentModeIndex = 2;
+    }
+
+    if (b.buttonOn(3))
+    {
+        Particle.publish("Button Pressed", "Down", 60, PRIVATE);
+
+        currentModeIndex = 3;
         b.allLedsOff();
     }
     
@@ -212,19 +225,17 @@ void loop()
     {
         Particle.publish("Button Pressed", "A", 60, PRIVATE);
 
-        if (!notificationAvailable)
+        if (!notificationAvailable && currentModeIndex == 0)
         {
             invokeQuery();
         }
+        else
+        {
+            currentModeIndex = 0;
+            b.allLedsOff();
+        }
 
         notificationAvailable = false;
-    }
-
-    if (b.buttonOn(3))
-    {
-        Particle.publish("Button Pressed", "Down", 60, PRIVATE);
-
-        invokeQuery();
     }
 }
 
@@ -241,25 +252,8 @@ void modeAction(int modeIndex)
         case 2:
             directionMode();
             break;
-    }
-}
-
-void setMode(int modeIndex)
-{
-    switch (modeIndex)
-    {
-        case 0:
-            b.allLedsOff();
-            break;
-        case 1:
-            setText("Motion", "");
-            b.allLedsOn(0, 0, 255); // Green
-            delay(500);
-            break;
-        case 2:
-            setText("Direction", "");
-            b.allLedsOn(0, 255, 0); // Green
-            delay(500);
+        case 3:
+            statusMode();
             break;
     }
 }
@@ -295,13 +289,13 @@ void toggleListening()
         b.ledOn(10, 0, 255, 0); // Green
         b.ledOn(11, 0, 0, 255); // Blue
         listeningOn = true;
-        setText("Listening", "On");
+        setText("Voice", "Listening");
     }
     else
     {
         b.allLedsOff();
         listeningOn = false;
-        setText("Listening", "Off");
+        setText("Voice", "Done");
     }
 }
 
@@ -354,13 +348,33 @@ void directionMode()
     if (lastDirection != ledPos)
     {
         Particle.publish("direction " + String(ledPos), NULL, 60, PRIVATE);
-        setText("Direction", String(ledPos), 3);
+        setText("Direction", 2, String(ledPos), 3);
     }
     
     lastDirection = ledPos;
 
     // Wait a mo'
     delay(100);
+}
+
+void statusMode()
+{
+    float cellVoltage = batteryMonitor.getVCell();
+    float stateOfCharge = batteryMonitor.getSoC();
+    float tempInCelcius = bmpSensor.readTemperature();
+    float tempInFarenheit = (tempInCelcius * 9 / 5) + 32;
+    int pressure = bmpSensor.readPressure();
+    float altitude = bmpSensor.readAltitude();
+    
+    setText("Status", 2,
+        "Volt (v): " + String(cellVoltage) + "\r\n" +
+        "Batt (%): " + String(stateOfCharge) + "\r\n" +
+        "Temp (c): " + String(tempInCelcius) + "\r\n" +
+        "Temp (f): " + String(tempInFarenheit) + "\r\n" +
+        "BP (hPa): " + String(pressure) + "\r\n" +
+        "Alt  (m): " + String(altitude), 1);
+
+    delay(250);
 }
 
 void showClock()
@@ -370,17 +384,39 @@ void showClock()
         String hour = (Time.hour() < 10 ? " 0" : " ") + String(Time.hour());
         String minute = (Time.minute() < 10 ? ":0": ":") + String(Time.minute());
         String second = (Time.second() < 10 ? ":0": ":") + String(Time.second());
-        
-        oled.clearDisplay();
-        oled.setTextSize(2);
-        oled.setTextColor(WHITE);
-        oled.setCursor(0, 0);
-        oled.println(getCurrentDate());
-        oled.println(hour + minute + second);
-        oled.display();
+        String batteryStatus = getBatteryStatus();
+        String temperature = getTemperature();
+
+        setText(temperature + "    " + batteryStatus + "\r\n---------------------", 1, getCurrentDate() + "\r\n\r\n" + hour + minute + second, 2);
 
         lastSecond = Time.second();
     }
+}
+
+String getBatteryStatus()
+{
+    // Read the volatge of the LiPo
+    float cellVoltage = batteryMonitor.getVCell();
+    // Read the State of Charge of the LiPo
+    float stateOfCharge = batteryMonitor.getSoC();
+
+    return String(cellVoltage, 2) + "v " + String(stateOfCharge, 0) + "%";
+}
+
+String getTemperature()
+{
+    float tempInCelcius = bmpSensor.readTemperature();
+    float tempInFarenheit = (tempInCelcius * 9 / 5) + 32;
+
+    return String(tempInCelcius, 0) + "c " + String(tempInFarenheit, 0) + "f";
+}
+
+String getPressureAltitude() 
+{
+    int pressure = bmpSensor.readPressure();
+    float altitude = bmpSensor.readAltitude();
+
+    return String(pressure) + "hPa " + String(altitude) + "m";
 }
 
 String getCurrentDate()
@@ -477,7 +513,7 @@ bool buttonPressed(int button)
     
     if (digitalRead(button) == HIGH)
     {
-        delay(50);
+        delay(10);
         
         if (digitalRead(button) == LOW)
         {
@@ -501,13 +537,13 @@ void setText(String line1, String line2)
         bodySize = 2;
     }
 
-    setText(line1, line2, bodySize);
+    setText(line1, 2, line2, bodySize);
 }
 
-void setText(String line1, String line2, int line2Size)
+void setText(String line1, int line1Size, String line2, int line2Size)
 {
     oled.clearDisplay();
-    oled.setTextSize(2);
+    oled.setTextSize(line1Size);
     oled.setTextColor(WHITE);
     oled.setCursor(0, 0);
     oled.println(line1);

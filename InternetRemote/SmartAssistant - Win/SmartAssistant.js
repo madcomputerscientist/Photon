@@ -4,6 +4,7 @@ var settings = {
     deviceId: "SWEARABLE",
     username: "alexander.yao@outlook.com",
     password: "Open1234",
+    access_token: "453744a9193ee961ba4e008f145fb7f3245796ab",
     event: "Listen"
 };
 
@@ -171,9 +172,10 @@ var processRequest = function (durationInMilliSeconds) {
 
 console.log("logging in...");
 
-particle.login({ username: settings.username, password: settings.password }).then(
-    function (data) {
-        token = data.body.access_token;
+//particle.login({ username: settings.username, password: settings.password, access_token: settings.access_token }).then(
+//    function (data) {
+        //token = data.body.access_token;
+        token = settings.access_token;
         console.log(token);
 
         particle.getVariable({ deviceId: settings.deviceId, name: 'ipAddress', auth: token }).then(
@@ -195,7 +197,7 @@ particle.login({ username: settings.username, password: settings.password }).the
             function (err) {
                 console.log('An error occurred while getting attrs:', err);
             });
-    },
-    function (err) {
-        console.log('Could not log in.', err);
-    });
+    // },
+    // function (err) {
+    //     console.log('Could not log in.', err);
+    // });

@@ -24,6 +24,7 @@
     "@google-cloud/speech": "0.9.3",
     "@google-cloud/storage": "1.1.1",
     "node-record-lpcm16": "0.3.0",
+    "particle-api-js": "^7.2.3",
     "yargs": "8.0.2"
   },
   "devDependencies": {
